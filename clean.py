@@ -2,7 +2,6 @@ import aiohttp
 import asyncio
 import lxml.html
 import json
-import tool
 
 TIMEOUT = 5
 DEFAULT_HEADERS = {
@@ -14,8 +13,9 @@ ALTERNATIVE_GET_HEADERS = {
 XML_HTTP_REQ_HEADERS = {
     "Accept": "*/*",
     "Connection": "keep-alive",
-    "User-Agent": "Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/65.0.3325.181 Mobile Safari/537.36",
+    "User-Agent": "Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.98 Mobile Safari/537.36",
     "X-Requested-With": "XMLHttpRequest",
+    "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
     "Accept-Encoding": "gzip, deflate",
     "Accept-Language": "en-US,en;q=0.9,ko;q=0.8",
     "Cache-Control": "no-cache",
@@ -31,7 +31,7 @@ POST_HEADERS = {
     "Content-Type": "application/x-www-form-urlencoded",
     "Pragma": "no-cache",
     "Upgrade-Insecure-Requests": "1",
-    "User-Agent": "Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/65.0.3325.181 Mobile Safari/537.36",
+    "User-Agent": "Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.98 Mobile Safari/537.36"
     }
 
 def naive_parse(text, start_token, end_token):
@@ -120,9 +120,14 @@ class Dc:
         payload = {"no": docid,
                    "con_key": con_key,
                    "g_id": self.id}
+        cookies = {
+            "m_gallog_{}".format(self.id): self.id,
+            "m_gallog_lately": "{}%7C%uB204%uB974%uC9C0%uB9C8%2C;".format(self.id),
+            "_gat_mobile_gallog_G": "1"
+        }
         print(payload)
         print(header)
-        async with self.sess.post(url, headers=header, data=payload) as res:
+        async with self.sess.post(url, headers=header, data=payload, cookies=cookies) as res:
             return (await res.text(encoding='utf8')).encode().decode()
     async def remove_gallog_docs_all(self):
         async for docid in self.__gallog_docs():
