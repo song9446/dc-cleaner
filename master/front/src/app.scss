@@ -28,7 +28,7 @@ body {
                          "bottomads bottomads bottomads"
                          "footer footer footer";
     grid-template-columns: 1fr 150px 150px;
-    grid-template-rows: 56px 0px 1fr 0px min-content;
+    grid-template-rows: 0fr 0px 1fr 0px min-content;
     min-height: 100vh;
 }
 .main {
@@ -42,7 +42,7 @@ body {
                             "bottomads"
                             "footer";
         grid-template-columns: 100%;
-        grid-template-rows: 56px 0px 1fr 0px min-content;
+        grid-template-rows: 0fr 0px 1fr 0px min-content;
         place-items: stretch;
     }
     .main {
