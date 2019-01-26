@@ -3,6 +3,9 @@
 beanstalkd=$(sed -nr "/^\[Beanstalkd\]/ { :l /^host[ ]*=/ { s/.*=[ ]*//; p; q;}; n; b l;}" ./config.ini)
 slaves=$(sed -nr "/^\[Slave\]/ { :l /^hosts[ ]*=/ { s/.*=[ ]*//; p; q;}; n; b l;}" ./config.ini)
 
+cd master/front && ./run.sh
+cd .. && cd ..
+
 ssh $beanstalkd -t beanstalkd &
 sleep 3
 

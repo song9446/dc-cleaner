@@ -12,20 +12,34 @@ config.read("../config.ini")
 reqq = queue.Queue()
 resq = queue.Queue()
 
-async def majorgall(id, pw):
+async def gallog_post(id, pw):
     async with Dc() as dc:
         await dc.login(id, pw)
         await dc.remove_gallog_posts()
+
+async def gallog_reply(id, pw):
+    async with Dc() as dc:
+        await dc.login(id, pw)
         await dc.remove_gallog_replies()
+
+async def gallery(gall_id, nickname, ip, pw):
+    async with Dc() as dc:
+        await dc.remove_gallery_posts(gall_id, nickname, ip, pw)
 
 def worker():
     loop = asyncio.get_event_loop_policy().new_event_loop()
     #loop = asyncio.get_event_loop()
     while True:
-        id, pw = reqq.get(True)
-        print("start job", id, pw)
+        req = reqq.get(True)
+        print("start job")
         try:
-            loop.run_until_complete(majorgall(id, pw))
+            if req["op"] == "gallog":
+                if req["post"] == True:
+                    loop.run_until_complete(gallog_post(req["id"], req["pw"]))
+                if req["reply"] == True:
+                    loop.run_until_complete(gallog_reply(req["id"], req["pw"]))
+            elif req["op"] == "gallery":
+                loop.run_until_complete(gallery(req["gall_id"], req["nickname"], req["ip"], req["pw"]))
         except Exception as e:
             print(e)
         resq.put(True)
@@ -38,14 +52,13 @@ def fetcher():
         job = client.reserve()
         print("get job", job.body)
         parsed = json.loads(job.body)
-        id, pw = parsed["id"], parsed["pw"]
-        reqq.put((id, pw))
+        reqq.put(parsed)
         while True:
             try:
                 client.touch(job)
                 resq.get(timeout=0.5)
                 client.delete(job)
-                client.put(json.dumps({"id": id}))
+                client.put(json.dumps({"id": parsed["id"]}))
                 break
             except queue.Empty:
                 continue

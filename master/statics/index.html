@@ -11,10 +11,10 @@
         <meta property="og:title" content="디씨클리너">
         <meta property="og:description" content="디씨클리너">
         <meta property="og:url" content="https://cleaner.wktkf.com">
-        <meta property="og:image" content="https://searchengineland.com/figz/wp-content/seloads/2016/04/keywords-magnifying-research-ss-1920-800x450.jpg">
-        <meta name="twitter:image" content="https://searchengineland.com/figz/wp-content/seloads/2016/04/keywords-magnifying-research-ss-1920-800x450.jpg">
         <meta name="theme-color" content="#2d3539">
         <link rel="canonical" href="https://cleaner.wktkf.com/">
+        <link rel="icon" href="/favicon.ico" type="image/x-icon">
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
         <title>디씨클리너</title>
 	<!-- Global site tag (gtag.js) - Google Analytics -->
 	<script async src="https://www.googletagmanager.com/gtag/js?id=UA-133285803-1"></script>
@@ -44,14 +44,50 @@
         background-color: #fff;
         color: #000;
         height: 100vh;
-        font-size: 10vw;
+        font-size: 9vw;
     }
 .github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}
 .fluid {
     display: flex;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+img[src="delete-black.svg"]{
+    vertical-align: middle;
+    width: 1.5em;
+    height: 1.5em;
+    margin-right: 0.5em;
+    margin-left: -1.2em;
+}
+img[src="list-black.svg"]{
+    vertical-align: middle;
+    width: 1.5em;
+    height: 1.5em;
+    margin-right: 0.5em;
+    margin-left: -1.2em;
+}
+img[src="delete-white.svg"]{
+    vertical-align: middle;
+    width: 1.5em;
+    height: 1.5em;
+}
+img[src="refresh-white.svg"]{
+    vertical-align: middle;
+    width: 1.5em;
+    height: 1.5em;
 }
 table {
     min-width: 12em;
+}
+label.inline-label {
+    display: inline-block;
+    font-size: 1em;
+}
+input[type="checkbox"] {
+    margin-right: 1em;
+    width: auto;
+    margin-top: 1em;
 }
 .modal{z-index:30;position:fixed;display:inline-block;left:50%;top:50%;transform:translate(-50%, -50%) scale(0.8);visibility:hidden;backface-visibility:hidden;transition:all 0.3s;opacity:0}.show .modal{visibility:visible;display:inline-block;transform:translate(-50%, -50%) scale(1);opacity:1}.overlay{z-index:29;position:fixed;width:100%;height:100%;left:0;top:0;opacity:0;visibility:hidden;transition:all 0.3s;background-color:rgba(0,0,0,0.5)}.show .overlay{visibility:visible;display:block;opacity:1}.modal-container{background:none;position:fixed}
 .lds-ring{display:inline-block;position:relative;width:64px;height:64px;visibility:hidden}.lds-ring div{box-sizing:border-box;display:block;position:absolute;width:51px;height:51px;margin:6px;border:6px solid #fff;border-radius:50%;animation:lds-ring 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;border-color:#fff transparent transparent transparent}.lds-ring div:nth-child(1){animation-delay:-0.45s}.lds-ring div:nth-child(2){animation-delay:-0.3s}.lds-ring div:nth-child(3){animation-delay:-0.15s}.lds-ring.show{visibility:visible}@keyframes lds-ring{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
@@ -69,35 +105,55 @@ table {
         <div class="main">
             <div id="main" class="index">
     <a href="https://github.com/song9446/dc-cleaner" class="github-corner" aria-label="View source on GitHub"><svg width="80" height="80" viewbox="0 0 250 250" style="fill:#151513; color:#fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a>
-    <div class="pannel">
-        <div>
-        * 본 사이트는 크롬 브라우저에 최적화되어있습니다. 
-        </div>
-    </div>
+    <br><br>
     
 
     <div class="fluid">
-    <div class="pannel">
-        <label for="id">디시인사이드 아이디</label>
-        <input id="id" name="id"><br>
-        <label for="pw">디시인사이드 비밀번호</label>
-        <input type="password" id="pw" name="pw"><br>
-        <button id="submit">지우기</button>
+    <div class="pannel" id="hard">
+        <div><img src="delete-black.svg">갤로그 삭제</div><br>
+        <label for="hard-id">디시인사이드 아이디</label>
+        <input id="hard-id" name="hard_id"><br>
+        <label for="hard-pw">디시인사이드 비밀번호</label>
+        <input type="password" id="hard-pw" name="hard-pw"><br>
+        <label for="hard-target">삭제 항목</label>
+        <div id="hard-target">
+            <label for="hard-post" class="inline-label">글</label>
+            <input type="checkbox" id="hard-post" name="hard-post">
+            <label for="hard-reply" class="inline-label">댓글</label>
+            <input type="checkbox" id="hard-reply" name="hard-reply">
+        </div>
+        <!--<select id="hard-target" name="hard-target">
+            <option value="post">글</option>
+            <option value="reply">댓글</option>
+        </select>-->
+        <button id="hard-submit"><img src="delete-white.svg"></button>
+    </div>
+    <div class="pannel" id="fluid">
+        <div><img src="delete-black.svg">갤러리 유동 글 삭제(최근글만)</div><br>
+        <label for="fluid-gall-id">갤러리아이디</label>
+        <input id="fluid-gall-id" name="fluid-gall-id" placeholder="baseball_new7"><br>
+        <label for="fluid-nickname">닉네임</label>
+        <input id="fluid-nickname" name="fluid-nickname" placeholder="ㅇㅇ"><br>
+        <label for="fluid-pw">비밀번호</label>
+        <input type="password" id="fluid-pw" name="fluid-pw"><br>
+        <label for="fluid-ip">아이피 앞 두자리</label>
+        <input id="fluid-ip" name="fluid-ip" placeholder="110.20">
+        <button id="fluid-submit"><img src="delete-white.svg"></button>
     </div>
     <div class="pannel">
+        <div><img src="list-black.svg">대기목록</div><br>
     <table>
         <thead>
             <tr> 
-                <th>대기목록</th>
+                <th>작업명</th>
             </tr>
         </thead>
         <tbody id="waitq">
             <tr>
-                <td>없음</td>
             </tr>
         </tbody>
     </table>
-    <button id="refresh_q">새로고침</button>
+    <button id="refresh_q"><img src="refresh-white.svg"></button>
     </div>
 </div>
 
@@ -111,39 +167,7 @@ table {
     <div class="overlay">
     </div>
 </div>
-<script>
-let waitq = document.getElementById("waitq"),
-    submit = document.getElementById("submit"),
-    id = document.getElementById("id"),
-    pw = document.getElementById("pw"),
-    refresh_q = document.getElementById("refresh_q");
-submit.onclick = ()=>{
-    open_modal("modal-loading-queue");
-    let payload = {
-        "id": id.value,
-        "pw": pw.value,
-    };
-    app.queue(payload).then(q=>{
-        q = JSON.parse(q);
-        console.log(q);
-        waitq.innerHTML = "";
-        q.forEach(id => waitq.insertRow().insertCell().textContent = ""+id);
-    }).finally(()=>{
-        close_modal("modal-loading-queue");
-    });
-};
-refresh_q.onclick = ()=>{
-    open_modal("modal-loading-queue");
-    app.queue().then(q=>{
-        q = JSON.parse(q);
-        waitq.innerHTML = "";
-        q.forEach(id => waitq.insertRow().insertCell().textContent = ""+id);
-    }).finally(()=>{
-        close_modal("modal-loading-queue");
-    });
-};
-refresh_q.click();
-</script>
+
 <div class="modal-container" id="modal-window-entrypopup" key="modal-window-entrypopup">
     <div class="modal">
         <div id="content">
@@ -181,6 +205,88 @@ refresh_q.click();
             </div>
         </footer>
     <script>
+window.addEventListener("beforeunload", ()=>{
+    [...document.getElementsByTagName('input')].forEach(e=>{
+        if(e.type=="text") localStorage.setItem(e.id, e.value);
+        else if(e.type=="checkbox") localStorage.setItem(e.id, e.checked);
+    });
+});
+window.addEventListener("load", ()=>{
+    [...document.getElementsByTagName('input')].forEach(e=>{
+        if(e.type=="text") e.value = localStorage.getItem(e.id)||"";
+        else if(e.type=="checkbox") e.checked=localStorage.getItem(e.id)=="true"||false;
+    });
+});
+</script>
+<script>
+let waitq = document.getElementById("waitq"),
+    hard_submit = document.getElementById("hard-submit"),
+    hard_id = document.getElementById("hard-id"),
+    hard_pw = document.getElementById("hard-pw"),
+    hard_post = document.getElementById("hard-post"),
+    hard_reply = document.getElementById("hard-reply"),
+    fluid_submit = document.getElementById("fluid-submit"),
+    fluid_gall_id = document.getElementById("fluid-gall-id"),
+    fluid_nickname = document.getElementById("fluid-nickname"),
+    fluid_pw = document.getElementById("fluid-pw"),
+    fluid_ip = document.getElementById("fluid-ip"),
+    refresh_q = document.getElementById("refresh_q");
+hard_submit.onclick = ()=>{
+    open_modal("modal-loading-queue");
+    let payload = {
+        "op": "gallog",
+        "post": hard_post.checked,
+        "reply": hard_reply.checked,
+        "id": hard_id.value,
+        "pw": hard_pw.value
+    };
+    app.queue(payload).then(q=>{
+        console.log(q);
+        q = JSON.parse(q);
+        waitq.innerHTML = "";
+        q.forEach(id => waitq.insertRow().insertCell().textContent = ""+id);
+    }).catch(e=>{
+        alert(e);
+    }).finally(()=>{
+        close_modal("modal-loading-queue");
+    });
+};
+fluid_submit.onclick = ()=>{
+    open_modal("modal-loading-queue");
+    let payload = {
+        "op": "gallery",
+        "gall_id": fluid_gall_id.value,
+        "nickname": fluid_nickname.value,
+        "pw": fluid_pw.value,
+        "ip": fluid_ip.value,
+        "id": `${fluid_gall_id.value}|${fluid_nickname.value}(${fluid_ip.value})` 
+    };
+    app.queue(payload).then(q=>{
+        console.log(q);
+        q = JSON.parse(q);
+        waitq.innerHTML = "";
+        q.forEach(id => waitq.insertRow().insertCell().textContent = ""+id);
+    }).catch(e=>{
+        alert(e);
+    }).finally(()=>{
+        close_modal("modal-loading-queue");
+    });
+};
+
+refresh_q.onclick = ()=>{
+    open_modal("modal-loading-queue");
+    app.queue().then(q=>{
+        console.log(q);
+        q = JSON.parse(q);
+        waitq.innerHTML = "";
+        q.forEach(id => waitq.insertRow().insertCell().textContent = ""+id);
+    }).finally(()=>{
+        close_modal("modal-loading-queue");
+    });
+};
+window.addEventListener('load', ()=>refresh_q.click());
+</script>
+<script>
             function close_modal(key) {
                 document.getElementById(key).classList.remove("show");
             };

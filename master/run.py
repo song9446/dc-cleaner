@@ -50,9 +50,10 @@ async def get_queue(req):
 async def put_queue(req):
     try:
         parsed = req.json
-        job = {"id": parsed["id"], "pw": parsed["pw"]}
-        req_q.put(job)
+        if "id" not in parsed or "op" not in parsed:
+            return response.text(str("no op or id field in request"))
         user_q.append(parsed["id"])
+        req_q.put(parsed)
         return response.json([i for i in user_q])
     except Exception as e:
         return response.text(str(e))

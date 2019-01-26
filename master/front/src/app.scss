@@ -110,10 +110,11 @@ select:disabled {
 input, select, option {
     margin: 0 auto;
     padding: 0.5em;
-    border: 1px solid #dfdfdf;
+    border: none;
+    border-bottom: 1px solid #444;
     max-width: 12em;
     width: 100%;
-    background-color: #fff;
+    background-color: transparent;
 /*    border-radius: 3px; */
     color: #444;
     font-size: 1em;
@@ -219,8 +220,9 @@ button.sort {
     flex-direction: column;
     justify-content: center;
     align-items: stretch;
-    background-color: #fff;
-    box-shadow: 0 4px 6px rgba(196,196,196,.15);
+    /*background-color: #fff;*/
+    /*box-shadow: 0 4px 6px rgba(196,196,196,.15);*/
+    border: dashed 1px black;
     padding: 1em 2em;
     margin-bottom: 1em;
     margin: 1em;
@@ -232,4 +234,8 @@ button.sort {
 label {
     font-size: 0.8em;
     display: block;
+}
+::placeholder { /* Chrome, Firefox, Opera, Safari 10.1+ */
+  color: #bbb;
+  opacity: 1; /* Firefox */
 }

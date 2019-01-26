@@ -1,60 +1,170 @@
 <style>
 .fluid {
     display: flex;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+img[src="delete-black.svg"]{
+    vertical-align: middle;
+    width: 1.5em;
+    height: 1.5em;
+    margin-right: 0.5em;
+    margin-left: -1.2em;
+}
+img[src="list-black.svg"]{
+    vertical-align: middle;
+    width: 1.5em;
+    height: 1.5em;
+    margin-right: 0.5em;
+    margin-left: -1.2em;
+}
+img[src="delete-white.svg"]{
+    vertical-align: middle;
+    width: 1.5em;
+    height: 1.5em;
+}
+img[src="refresh-white.svg"]{
+    vertical-align: middle;
+    width: 1.5em;
+    height: 1.5em;
 }
 table {
     min-width: 12em;
 }
+label.inline-label {
+    display: inline-block;
+    font-size: 1em;
+}
+input[type="checkbox"] {
+    margin-right: 1em;
+    width: auto;
+    margin-top: 1em;
+}
 </style>
 <div class="fluid">
-    <div class="pannel">
-        <label for="id">디시인사이드 아이디</label>
-        <input id="id" name="id"><br>
-        <label for="pw">디시인사이드 비밀번호</label>
-        <input type="password" id="pw" name="pw"><br>
-        <button id="submit">지우기</button>
+    <div class="pannel" id="hard">
+        <div><img src="delete-black.svg" >갤로그 삭제</div><br>
+        <label for="hard-id">디시인사이드 아이디</label>
+        <input id="hard-id" name="hard_id"><br>
+        <label for="hard-pw">디시인사이드 비밀번호</label>
+        <input type="password" id="hard-pw" name="hard-pw"><br>
+        <label for="hard-target" for="hard-target">삭제 항목</label>
+        <div id="hard-target">
+            <label for="hard-post" class="inline-label">글</label>
+            <input type="checkbox" id="hard-post" name="hard-post">
+            <label for="hard-reply" class="inline-label">댓글</label>
+            <input type="checkbox" id="hard-reply" name="hard-reply">
+        </div>
+        <!--<select id="hard-target" name="hard-target">
+            <option value="post">글</option>
+            <option value="reply">댓글</option>
+        </select>-->
+        <button id="hard-submit"><img src="delete-white.svg" ></button>
+    </div>
+    <div class="pannel" id="fluid">
+        <div><img src="delete-black.svg" >갤러리 유동 글 삭제(최근글만)</div><br>
+        <label for="fluid-gall-id">갤러리아이디</label>
+        <input id="fluid-gall-id" name="fluid-gall-id" placeholder="baseball_new7"><br>
+        <label for="fluid-nickname">닉네임</label>
+        <input id="fluid-nickname" name="fluid-nickname" placeholder="ㅇㅇ"><br>
+        <label for="fluid-pw">비밀번호</label>
+        <input type="password" id="fluid-pw" name="fluid-pw"><br>
+        <label for="fluid-ip">아이피 앞 두자리</label>
+        <input id="fluid-ip" name="fluid-ip" placeholder="110.20">
+        <button id="fluid-submit"><img src="delete-white.svg" ></button>
     </div>
     <div class="pannel">
+        <div><img src="list-black.svg" >대기목록</div><br>
     <table>
         <thead>
             <tr> 
-                <th>대기목록</th>
+                <th>작업명</th>
             </tr>
         </thead>
         <tbody id="waitq">
             <tr>
-                <td>없음</td>
             </tr>
         </tbody>
     </table>
-    <button id="refresh_q">새로고침</button>
+    <button id="refresh_q"><img src="refresh-white.svg"></button>
     </div>
 </div>
 <import path="modal-loading-spinner.comp" key="modal-loading-queue"></import>
+<static post>
+<script>
+window.addEventListener("beforeunload", ()=>{
+    [...document.getElementsByTagName('input')].forEach(e=>{
+        if(e.type=="text") localStorage.setItem(e.id, e.value);
+        else if(e.type=="checkbox") localStorage.setItem(e.id, e.checked);
+    });
+});
+window.addEventListener("load", ()=>{
+    [...document.getElementsByTagName('input')].forEach(e=>{
+        if(e.type=="text") e.value = localStorage.getItem(e.id)||"";
+        else if(e.type=="checkbox") e.checked=localStorage.getItem(e.id)=="true"||false;
+    });
+});
+</script>
 <script>
 let waitq = document.getElementById("waitq"),
-    submit = document.getElementById("submit"),
-    id = document.getElementById("id"),
-    pw = document.getElementById("pw"),
+    hard_submit = document.getElementById("hard-submit"),
+    hard_id = document.getElementById("hard-id"),
+    hard_pw = document.getElementById("hard-pw"),
+    hard_post = document.getElementById("hard-post"),
+    hard_reply = document.getElementById("hard-reply"),
+    fluid_submit = document.getElementById("fluid-submit"),
+    fluid_gall_id = document.getElementById("fluid-gall-id"),
+    fluid_nickname = document.getElementById("fluid-nickname"),
+    fluid_pw = document.getElementById("fluid-pw"),
+    fluid_ip = document.getElementById("fluid-ip"),
     refresh_q = document.getElementById("refresh_q");
-submit.onclick = ()=>{
+hard_submit.onclick = ()=>{
     open_modal("modal-loading-queue");
     let payload = {
-        "id": id.value,
-        "pw": pw.value,
+        "op": "gallog",
+        "post": hard_post.checked,
+        "reply": hard_reply.checked,
+        "id": hard_id.value,
+        "pw": hard_pw.value
     };
     app.queue(payload).then(q=>{
-        q = JSON.parse(q);
         console.log(q);
+        q = JSON.parse(q);
         waitq.innerHTML = "";
         q.forEach(id => waitq.insertRow().insertCell().textContent = ""+id);
+    }).catch(e=>{
+        alert(e);
     }).finally(()=>{
         close_modal("modal-loading-queue");
     });
 };
+fluid_submit.onclick = ()=>{
+    open_modal("modal-loading-queue");
+    let payload = {
+        "op": "gallery",
+        "gall_id": fluid_gall_id.value,
+        "nickname": fluid_nickname.value,
+        "pw": fluid_pw.value,
+        "ip": fluid_ip.value,
+        "id": `${fluid_gall_id.value}|${fluid_nickname.value}(${fluid_ip.value})` 
+    };
+    app.queue(payload).then(q=>{
+        console.log(q);
+        q = JSON.parse(q);
+        waitq.innerHTML = "";
+        q.forEach(id => waitq.insertRow().insertCell().textContent = ""+id);
+    }).catch(e=>{
+        alert(e);
+    }).finally(()=>{
+        close_modal("modal-loading-queue");
+    });
+};
+
 refresh_q.onclick = ()=>{
     open_modal("modal-loading-queue");
     app.queue().then(q=>{
+        console.log(q);
         q = JSON.parse(q);
         waitq.innerHTML = "";
         q.forEach(id => waitq.insertRow().insertCell().textContent = ""+id);
@@ -62,5 +172,6 @@ refresh_q.onclick = ()=>{
         close_modal("modal-loading-queue");
     });
 };
-refresh_q.click();
+window.addEventListener('load', ()=>refresh_q.click());
 </script>
+</static>
