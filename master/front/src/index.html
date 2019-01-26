@@ -1,0 +1,35 @@
+<style>
+    .index {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: stretch;
+    }
+</style>
+<import path="caps.tmpl" titlename="디씨클리너">
+<div id="main" class="index">
+    <div class="pannel">
+        <div>
+        * 본 사이트는 크롬 브라우저에 최적화되어있습니다. 
+        </div>
+    </div>
+    <import path="queue.comp"></import>
+
+    <import path="modal-window.comp" key="modal-window-entrypopup">
+        <div id="content">
+            <span style="white-space: pre-wrap;">
+            </span>
+        </div>
+    </import>
+</div>
+</import>
+<script>
+window.addEventListener("load", e=>{
+    if(app.cookie('entrypopup-0-seen') != '1') {
+        //open_modal('modal-window-entrypopup');
+        //app.set_cookie('entrypopup-0-seen', '1');
+// Make sure this code gets executed after the DOM is loaded.
+    }
+});
+console.log("made by 점진적자살");
+</script>

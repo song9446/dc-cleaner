@@ -1,7 +1,7 @@
 import aiohttp
 import asyncio
-import lxml.html
 import json
+from tenacity import *
 
 TIMEOUT = 5
 DEFAULT_HEADERS = {
@@ -54,12 +54,10 @@ def naive_parse_all(text, start_token, end_token):
             yield text[i:j]
             j += len(end_token)
 
-if __name__ == "__main__":
-    print(naive_parse("123456712", "1", "1"))
-    print([i for i in naive_parse_all("123456 12 131313 141214", "1", "1")])
 class Dc:
     def __init__(self):
         self.sess = aiohttp.ClientSession(headers=DEFAULT_HEADERS, timeout=aiohttp.ClientTimeout(total=TIMEOUT))
+        self.id = None
     async def __aenter__(self):
         self.csrf = await self.__csrf("http://m.dcinside.com/board/programming")
         return self
@@ -84,8 +82,6 @@ class Dc:
         url = "https://dcid.dcinside.com/join/mobile_login_ok_new.php"
         header = POST_HEADERS
         header["Referer"] = "http://m.dcinside.com/"
-        header["Host"] = "dcid.dcinside.com"
-        header["Origin"] = "http://m.dcinside.com"
         payload = {
                 "user_id": id,
                 "user_pw": pw,
@@ -93,28 +89,52 @@ class Dc:
                 "con_key": con_key,
                 "r_url": "http://m.dcinside.com/" }
         async with self.sess.post(url, headers=header, data=payload) as res:
+            if "rucode" in await res.text():
+                return False
             self.id = id
-            return await res.text()
-    async def __gallog_docs(self):
-        page = 1
-        while True:
-            url = "http://m.dcinside.com/gallog/{}?menu=G&page={}".format(self.id, page)
-            async with self.sess.get(url) as res:
-                docs = [i for i in naive_parse_all(await res.read(), b""""del-rt" no= '""", b"'")]
-                if not docs: break
-                for i in docs: yield i
-            page += 1
+            return True
+    async def logout(self, id, pw):
+        self.id = None
+        return False
+    async def __gallog_page_entries(self, mode, page):
+        header = XML_HTTP_REQ_HEADERS
+        url = "http://m.dcinside.com/gallog/{}?menu={}".format(self.id, mode)
+        header["Referer"] = url
+        header["X-CSRF-TOKEN"] = self.csrf
+        url = "http://m.dcinside.com/ajax/response-galloglist"
+        payload = {"g_id": self.id, "menu": mode, "page": page, "list_more": 1}
+        cookies = {
+            "m_gallog_{}".format(self.id): self.id,
+            "m_gallog_lately": "{}%7C%uB204%uB974%uC9C0%uB9C8%2C;".format(self.id),
+            "_gat_mobile_gallog_G": "1",
+            "_gat_mobile_gallog_R": "1"
+        }
+        async with self.sess.post(url, headers=header, data=payload, cookies=cookies) as res:
+            text = res.read()
+            return [int(i) for i in naive_parse_all(await res.read(), b'"no":', b",")]
+        '''
+        url = "http://m.dcinside.com/gallog/{}?menu={}&page={}".format(self.id, mode, page)
+        async with self.sess.get(url) as res:
+            return [int(i) for i in naive_parse_all(await res.read(), b""""del-rt" no= '""", b"'")]
+        '''
+    async def __gallog_entries(self, mode):
+        url = "http://m.dcinside.com/gallog/{}?menu={}".format(self.id, mode)
+        async with self.sess.get(url) as res:
+            text = await res.read()
+            docs_num = int(naive_parse(text, b'<span class="count2">(', b')').replace(b',',b''))
+            page_num_upper_bound = docs_num//30+10
+        docs = await asyncio.gather(*(self.__gallog_page_entries(mode, i) for i in range(1, page_num_upper_bound)))
+        return [j for i in docs for j in i]
     async def __csrf(self, url):
         async with self.sess.get(url) as res:
             return naive_parse(await res.read(), b'<meta name="csrf-token" content="', b'"').decode()
-    async def __remove_gallog_doc(self, docid):
-        url = "http://m.dcinside.com/gallog/{}?menu=G".format(self.id)
+    @retry(stop=stop_after_attempt(10))
+    async def __remove_gallog_entry(self, mode, docid):
+        url = "http://m.dcinside.com/gallog/{}?menu={}".format(self.id, mode)
         #self.csrf = await self.__csrf(url)
         con_key = await self.__access("gallogDel", url)
         header = XML_HTTP_REQ_HEADERS
         header["Referer"] = url
-        header["Origin"] = "http://m.dcinside.com"
-        header["Host"] = "m.dcinside.com"
         header["X-CSRF-TOKEN"] = self.csrf
         url = "http://m.dcinside.com/gallog/log-del"
         payload = {"no": docid,
@@ -123,20 +143,24 @@ class Dc:
         cookies = {
             "m_gallog_{}".format(self.id): self.id,
             "m_gallog_lately": "{}%7C%uB204%uB974%uC9C0%uB9C8%2C;".format(self.id),
-            "_gat_mobile_gallog_G": "1"
+            "_gat_mobile_gallog_G": "1",
+            "_gat_mobile_gallog_R": "1"
         }
-        print(payload)
-        print(header)
         async with self.sess.post(url, headers=header, data=payload, cookies=cookies) as res:
-            return (await res.text(encoding='utf8')).encode().decode()
-    async def remove_gallog_docs_all(self):
-        async for docid in self.__gallog_docs():
-            print(await self.__remove_gallog_doc(docid.decode()))
+            return (naive_parse(await res.read(), b'result":', b'}') == b'true')
+    async def remove_gallog_posts(self):
+        if self.id is None: return None
+        mode = "G"
+        res = await asyncio.gather(*[self.__remove_gallog_entry(mode, docid) for docid in await self.__gallog_entries(mode)])
+    async def remove_gallog_replies(self):
+        if self.id is None: return None
+        mode = "R"
+        res = await asyncio.gather(*[self.__remove_gallog_entry(mode, docid) for docid in await self.__gallog_entries(mode)])
 
 async def main():
     async with Dc() as dc:
         print(await dc.login("bot123", "1q2w3e4r!"))
-        print(await dc.remove_gallog_docs_all())
+        print(await dc.remove_gallog_replies())
 
 if __name__ == '__main__':
     loop = asyncio.get_event_loop()

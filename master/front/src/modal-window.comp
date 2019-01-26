@@ -1,0 +1,36 @@
+<style type="text/scss">
+.window {
+  background-color: #fff;
+  border: 1px solid #dfdfdf;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 4px 6px rgba(196,196,196,.15);
+  align-items: center;
+}
+.window-close-btn {
+  background-color: transparent;
+  margin: 0;
+  color: black;
+  position: absolute;
+  top: 0;
+  right: 0;
+}
+
+</style>
+<import path="modal.comp" key="{{{key}}}">
+    <div id="content">
+        <button class="window-close-btn" id="{{{key}}}-x-btn" onclick="close_modal('{{{key}}}');">X</button>
+        <div class="window" id="content">
+            <innerhtml id="content" > </innerhtml>
+            <button id="{{{key}}}-close-btn" onclick="close_modal('{{{key}}}');">닫기</button>
+        </div>
+    </div>
+</import>
+<script>
+    document.addEventListener("keyup", event => {
+        if(event.key == "Escape")
+            document.getElementById("{{{key}}}-x-btn").click();
+        //event.preventDefault(); // No need to `return false;`.
+    });
+</script>

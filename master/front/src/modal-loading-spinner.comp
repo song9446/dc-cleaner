@@ -1,0 +1,5 @@
+<import path="modal.comp" key="{{{key}}}">
+    <div id="content">
+        <import path="loading-spinner.comp" style="visibility: visible"></import>
+    </div>
+</import>

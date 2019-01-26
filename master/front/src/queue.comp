@@ -1,0 +1,66 @@
+<style>
+.fluid {
+    display: flex;
+}
+table {
+    min-width: 12em;
+}
+</style>
+<div class="fluid">
+    <div class="pannel">
+        <label for="id">디시인사이드 아이디</label>
+        <input id="id" name="id"><br>
+        <label for="pw">디시인사이드 비밀번호</label>
+        <input type="password" id="pw" name="pw"><br>
+        <button id="submit">지우기</button>
+    </div>
+    <div class="pannel">
+    <table>
+        <thead>
+            <tr> 
+                <th>대기목록</th>
+            </tr>
+        </thead>
+        <tbody id="waitq">
+            <tr>
+                <td>없음</td>
+            </tr>
+        </tbody>
+    </table>
+    <button id="refresh_q">새로고침</button>
+    </div>
+</div>
+<import path="modal-loading-spinner.comp" key="modal-loading-queue"></import>
+<script>
+let waitq = document.getElementById("waitq"),
+    submit = document.getElementById("submit"),
+    id = document.getElementById("id"),
+    pw = document.getElementById("pw"),
+    refresh_q = document.getElementById("refresh_q");
+submit.onclick = ()=>{
+    open_modal("modal-loading-queue");
+    let payload = {
+        "id": id.value,
+        "pw": pw.value,
+    };
+    app.queue(payload).then(q=>{
+        q = JSON.parse(q);
+        console.log(q);
+        waitq.innerHTML = "";
+        q.forEach(id => waitq.insertRow().insertCell().textContent = ""+id);
+    }).finally(()=>{
+        close_modal("modal-loading-queue");
+    });
+};
+refresh_q.onclick = ()=>{
+    open_modal("modal-loading-queue");
+    app.queue().then(q=>{
+        q = JSON.parse(q);
+        waitq.innerHTML = "";
+        q.forEach(id => waitq.insertRow().insertCell().textContent = ""+id);
+    }).finally(()=>{
+        close_modal("modal-loading-queue");
+    });
+};
+refresh_q.click();
+</script>
