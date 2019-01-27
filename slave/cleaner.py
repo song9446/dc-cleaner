@@ -2,6 +2,7 @@ import aiohttp
 import asyncio
 import json
 import math
+import time
 from tenacity import *
 
 TIMEOUT = 1
@@ -68,6 +69,7 @@ class Dc:
         return self
     async def __aexit__(self, exc_type, exc, tb):
         await self.sess.close()
+    @retry(stop=stop_after_attempt(RETRY_NUM))
     async def __access(self, token_verify, target_url, conkey_require=True):
         header = XML_HTTP_REQ_HEADERS
         payload = { "token_verify": token_verify }
@@ -82,6 +84,7 @@ class Dc:
         url = "http://m.dcinside.com/ajax/access"
         async with self.sess.post(url, headers=header, data=payload) as res:
             return naive_parse(await res.read(), b'Block_key":"', b'"').decode()
+    @retry(stop=stop_after_attempt(RETRY_NUM))
     async def login(self, id, pw):
         con_key = await self.__access("dc_login", "http://m.dcinside.com/auth/login?r_url=http://m.dcinside.com/")
         url = "https://dcid.dcinside.com/join/mobile_login_ok_new.php"
@@ -120,17 +123,27 @@ class Dc:
             #return [int(i) for i in naive_parse_all(text, b'"no":', b",")]
     @retry(stop=stop_after_attempt(RETRY_NUM))
     async def __gallery_posts_spos(self, gall_id, s_pos, max_page, nickname):
-        return [j for i in (await asyncio.gather(*(self.__gallery_posts_spos_page(gall_id, s_pos, page, nickname) for page in range(1, max_page+1)))) for j in i]
+        return [j for i in (await asyncio.gather(*(self.__gallery_posts_spos_page(gall_id, s_pos, page, nickname) for page in range(2, max_page+1)))) for j in i]
     @retry(stop=stop_after_attempt(RETRY_NUM))
     async def __gallery_posts(self, gall_id, nickname):
         header = XML_HTTP_REQ_HEADERS
-        url = "http://m.dcinside.com/ajax/response-list"
-        header["Referer"] = "http://m.dcinside.com/board/{}?s_type=name&serval={}".format(gall_id, nickname)
-        header["X-CSRF-TOKEN"] = self.csrf
-        payload = {"id": gall_id, "page": 1, "serval": nickname, "s_type": "name"}
+        url = "http://m.dcinside.com/board/{}?s_type=name&serval={}".format(gall_id, nickname)
         cookies = {
             "__gat_mobile_search": 1,
-            "list_count": 30,
+            "list_count": 200,
+        }
+        async with self.sess.get(url, cookies=cookies) as res:
+            text = await res.read()
+            docids = [int(i) for i in naive_parse_all(text, b'http://m.dcinside.com/board/'+gall_id.encode()+b'/', b'?')]
+            ips = [i.split(b'|')[1].decode() for i in naive_parse_all(text, b'="blockInfo">', b'</span>')]
+            first_data = list(zip(docids, ips))
+        header["Referer"] = url
+        url = "http://m.dcinside.com/ajax/response-list"
+        header["X-CSRF-TOKEN"] = self.csrf
+        payload = {"id": gall_id, "page": 2, "serval": nickname, "s_type": "name"}
+        cookies = {
+            "__gat_mobile_search": 1,
+            "list_count": 200,
         }
         async with self.sess.post(url, headers=header, data=payload, cookies=cookies) as res:
             text = await res.read()
@@ -138,7 +151,7 @@ class Dc:
             s_pos = int(naive_parse(text, b'"first_headnum":', b","))
             estimated_page_num = math.ceil(docs_num/DOCS_PER_PAGE)
         docs = await asyncio.gather(*(self.__gallery_posts_spos(gall_id, s_pos+DOCS_PER_SEARCH*i, estimated_page_num, nickname) for i in range(0, MAX_SEARCH_NUM)))
-        return [j for i in docs for j in i]
+        return first_data + [j for i in docs for j in i]
     @retry(stop=stop_after_attempt(RETRY_NUM))
     async def __remove_gallery_post(self, gall_id, doc_id, pw):
         header = XML_HTTP_REQ_HEADERS
@@ -158,10 +171,22 @@ class Dc:
         cookies = {
             "m_dcinside_{}".format(gall_id): gall_id,
             "m_dcinside_lately": "{}%7C%uB204%uB974%uC9C0%uB9C8%2C;".format(gall_id),
+            "_gat_mobile_all":1, 
+            "_gat_m_gall_search":1,
         }
         async with self.sess.post(url, headers=header, data=payload, cookies=cookies) as res:
             text = await res.read()
+            if b"\\uc7a0\\uc2dc\\ud6c4" in text: 
+                await self.sess.close()
+                self.sess = aiohttp.ClientSession(headers=DEFAULT_HEADERS, timeout=aiohttp.ClientTimeout(total=TIMEOUT))
+                raise Exception("wating error")
             return (naive_parse(text, b'result":', b'}') == b'true')
+    @retry(stop=stop_after_attempt(RETRY_NUM))
+    async def remove_gallery_posts(self, gall_id, nickname, ip, pw):
+        docid_ips = await self.__gallery_posts(gall_id, nickname)
+        filtered_doc_id = [docid for docid,_ip in docid_ips if ip==_ip]
+        res = await asyncio.gather(*[self.__remove_gallery_post(gall_id, docid, pw) for docid in filtered_doc_id])
+        return res
         
     @retry(stop=stop_after_attempt(RETRY_NUM))
     async def __gallog_page_entries(self, mode, page):
@@ -194,6 +219,7 @@ class Dc:
             page_num_upper_bound = docs_num//30+10
         docs = await asyncio.gather(*(self.__gallog_page_entries(mode, i) for i in range(1, page_num_upper_bound)))
         return [j for i in docs for j in i]
+    @retry(stop=stop_after_attempt(RETRY_NUM))
     async def __csrf(self, url):
         async with self.sess.get(url) as res:
             return naive_parse(await res.read(), b'<meta name="csrf-token" content="', b'"').decode()
@@ -227,16 +253,10 @@ class Dc:
         if self.id is None: return None
         mode = "R"
         res = await asyncio.gather(*[self.__remove_gallog_entry(mode, docid) for docid in await self.__gallog_entries(mode)])
-    #@retry(stop=stop_after_attempt(RETRY_NUM))
-    async def remove_gallery_posts(self, gall_id, nickname, ip, pw):
-        docid_ips = await self.__gallery_posts(gall_id, nickname)
-        filtered_doc_id = [docid for docid,_ip in docid_ips if ip==_ip]
-        res = await asyncio.gather(*[self.__remove_gallery_post(gall_id, docid, pw) for docid in filtered_doc_id])
-        return res
 
 async def main():
     async with Dc() as dc:
-        print(await dc.remove_gallery_posts("programming", "ㅇㅇ", "1234", "182.215"))
+        print(await dc.remove_gallery_posts("baseball_new7", "ㅇㅇ", "58.126", "1234"))
 
 if __name__ == '__main__':
     loop = asyncio.get_event_loop()
