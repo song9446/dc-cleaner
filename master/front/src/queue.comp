@@ -41,6 +41,9 @@ input[type="checkbox"] {
     width: auto;
     margin-top: 1em;
 }
+.running {
+    text-decoration: underline;
+}
 </style>
 <div class="fluid">
     <div class="pannel" id="hard">
@@ -133,6 +136,10 @@ hard_submit.onclick = ()=>{
         q = JSON.parse(q);
         waitq.innerHTML = "";
         q.forEach(id => waitq.insertRow().insertCell().textContent = ""+id);
+        if(waitq.rows.length){
+            waitq.rows[0].textContent += " - 작업중";
+            waitq.rows[0].classList.add("running");
+        }
     }).catch(e=>{
         alert(e);
     }).finally(()=>{
@@ -154,6 +161,10 @@ fluid_submit.onclick = ()=>{
         q = JSON.parse(q);
         waitq.innerHTML = "";
         q.forEach(id => waitq.insertRow().insertCell().textContent = ""+id);
+        if(waitq.rows.length){
+            waitq.rows[0].textContent += " - 작업중";
+            waitq.rows[0].classList.add("running");
+        }
     }).catch(e=>{
         alert(e);
     }).finally(()=>{
@@ -168,6 +179,12 @@ refresh_q.onclick = ()=>{
         q = JSON.parse(q);
         waitq.innerHTML = "";
         q.forEach(id => waitq.insertRow().insertCell().textContent = ""+id);
+        if(waitq.rows.length){
+            waitq.rows[0].textContent += " - 작업중";
+            waitq.rows[0].classList.add("running");
+        }
+    }).catch(e=>{
+        alert(e);
     }).finally(()=>{
         close_modal("modal-loading-queue");
     });

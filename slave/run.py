@@ -41,14 +41,14 @@ def worker():
             elif req["op"] == "gallery":
                 loop.run_until_complete(gallery(req["gall_id"], req["nickname"], req["ip"], req["pw"]))
         except Exception as e:
-            print(e)
+            print("Error:", e)
         resq.put(True)
         
 
 def fetcher():
     client = greenstalk.Client(host=config["Beanstalkd"]["host"], port=config["Beanstalkd"]["port"], use="result", watch="job")
     while True:
-        print("wating job..")
+        print("waiting job..")
         job = client.reserve()
         print("get job", job.body)
         parsed = json.loads(job.body)
