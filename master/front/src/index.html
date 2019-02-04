@@ -13,13 +13,23 @@
         align-items: center;
         color: #000;
         height: 100vh;
-        font-size: 9vw;
+        font-size: 9vh;
     }
     .front {
         background: transparent;
     }
     .fixed-scroll-fade-out {
+        color: #000;
         position: fixed;
+        top: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        /*background: url("/pattern.jpg");*/
+        background-size: cover;
+        bckground-size: cover;
+        width: 100vw;
+        height: 100vh;
         opacity: 1;
         transition: opacity .1s linear;
         z-index: -1;
@@ -27,13 +37,17 @@
     .main {
     }
 </style>
-<import path="caps.tmpl" titlename="디씨클리너">
+<import path="caps.tmpl" titlename="디시클리너 - 디시인사이드 일괄 글/댓글 삭제 - 잊혀질 권리를 위해..">
 <div id="header" class="front">
-    <h1 class="fixed-scroll-fade-out">잊.혀.질..권.리</h1>
+    <div class="fixed-scroll-fade-out">
+        <h1>잊.혀.질..권.리</h1>
+    </div>
     <script> 
         [...document.getElementsByClassName("fixed-scroll-fade-out")].forEach(e=>{
             window.addEventListener("scroll", evt=>{
-                e.style.opacity = ""+Math.max((e.offsetBottom-window.scrollY)/e.offsetBottom, 0);
+                e.style.opacity = ""+Math.max((e.offsetTop+e.offsetHeight*1.8-window.scrollY)/(e.offsetTop+e.offsetHeight*1.8), 0);
+                e.style.marginTop = "-" + Math.max((window.scrollY/2 - 30), 0) + "px"
+                //e.style.marginTop = "-"+Math.max((e.offsetTop+e.offsetHeight-window.scrollY)/(e.offsetTop+e.offsetHeight), 0);
             });
         });
     </script>

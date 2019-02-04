@@ -23,7 +23,7 @@ ALTERNATIVE_GET_HEADERS = {
 XML_HTTP_REQ_HEADERS = {
     "Accept": "*/*",
     "Connection": "keep-alive",
-    "User-Agent": "Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.98 Mobile Safari/537.36",
+    "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0.3538.67 Safari/537.36",
     "X-Requested-With": "XMLHttpRequest",
     "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
     "Accept-Encoding": "gzip, deflate",
@@ -113,6 +113,7 @@ class Dc:
         url = "http://m.dcinside.com/ajax/access"
         async with self.sess.post(url, headers=header, data=payload) as res:
             return naive_parse(await res.read(), b'Block_key":"', b'"').decode(), csrf
+    @retry(before_sleep=log, reraise=True, retry=retry_if_exception_type(asyncio.TimeoutError), stop=stop_after_attempt(RETRY_NUM))
     async def login(self, id, pw):
         print("login..", id)
         con_key, _ = await self.__access("dc_login", "http://m.dcinside.com/auth/login?r_url=http://m.dcinside.com/")
@@ -187,6 +188,7 @@ class Dc:
     @retry(before_sleep=log, reraise=True, retry=retry_if_exception_type(asyncio.TimeoutError), stop=stop_after_attempt(RETRY_NUM)) 
     async def __remove_gallery_post(self, gall_id, doc_id, pw):
         #async with self.semaphore:
+        print("remove gallery posts..")
         header = XML_HTTP_REQ_HEADERS
         url = "http://m.dcinside.com/confirmpw/{}/{}?mode=del".format(gall_id, doc_id)
         con_key, csrf = await self.__access("board_Del", url)#, conkey_require=False)
@@ -209,6 +211,7 @@ class Dc:
         }
         async with self.sess.post(url, headers=header, data=payload, cookies=cookies) as res:
             text = await res.read()
+            print(text, doc_id, pw)
             if b"\\uc7a0\\uc2dc\\ud6c4" in text: 
                 await self.sess.close()
                 self.gen_session()
@@ -226,108 +229,43 @@ class Dc:
         return res
         
     @retry(before_sleep=log, reraise=True, retry=retry_if_exception_type(asyncio.TimeoutError), stop=stop_after_attempt(RETRY_NUM))
-    async def __gallog_page_entries(self, mode, page, csrf):
-        header = XML_HTTP_REQ_HEADERS
-        url = "http://m.dcinside.com/gallog/{}?menu={}".format(self.id, mode)
-        header["Referer"] = url
-        header["X-CSRF-TOKEN"] = csrf
-        url = "http://m.dcinside.com/ajax/response-galloglist"
-        payload = {"g_id": self.id, "menu": mode, "page": page, "list_more": 1}
-        cookies = {
-            "m_gallog_{}".format(self.id): self.id,
-            "m_gallog_lately": "{}%7C%uB204%uB974%uC9C0%uB9C8%2C;".format(self.id),
-            "_gat_mobile_gallog_G": "1",
-            "_gat_mobile_gallog_R": "1"
-        }
-        async with self.sess.post(url, headers=header, data=payload, cookies=cookies) as res:
-            text = await res.read()
-            return [int(i) for i in naive_parse_all(text, b'"no":', b",")]
-        '''
-        url = "http://m.dcinside.com/gallog/{}?menu={}&page={}".format(self.id, mode, page)
-        async with self.sess.get(url) as res:
-            return [int(i) for i in naive_parse_all(await res.read(), b""""del-rt" no= '""", b"'")]
-        '''
-    async def __gallog_entries(self, mode):
-        print("collect gallog entries..")
-        url = "http://m.dcinside.com/gallog/{}?menu={}".format(self.id, mode)
-        async with self.sess.get(url) as res:
-            text = await res.read()
-            csrf = self.__fetch_csrf(text)
-            docs_num = int(naive_parse(text, b'<span class="count2">(', b')').replace(b',',b''))
-            page_num_upper_bound = docs_num//30+1
-        docs = await asyncio.gather(*(self.__gallog_page_entries(mode, i, csrf) for i in range(1, page_num_upper_bound+1)))
-        return [j for i in docs for j in i]
-    @retry(before_sleep=log, reraise=True, retry=retry_if_exception_type(asyncio.TimeoutError), stop=stop_after_attempt(RETRY_NUM))
     async def __csrf(self, url):
         async with self.sess.get(url) as res:
             return __fetch_csrf(await res.read())
     def __fetch_csrf(self, html):
             return naive_parse(html, b'<meta name="csrf-token" content="', b'"').decode()
-    @retry(before_sleep=log, reraise=True, retry=retry_if_exception_type(asyncio.TimeoutError), stop=stop_after_attempt(3), wait=wait_fixed(1))
-    async def __remove_gallog_entry(self, mode, docid):
-        url = "http://m.dcinside.com/gallog/{}?menu={}".format(self.id, mode)
-        con_key, csrf = await self.__access("gallogDel", url)
-        header = XML_HTTP_REQ_HEADERS
-        header["Referer"] = url
-        header["X-CSRF-TOKEN"] = csrf
-        url = "http://m.dcinside.com/gallog/log-del"
-        payload = {"no": docid,
-                   "con_key": con_key,
-                   "g_id": self.id}
-        cookies = {
-            "m_gallog_{}".format(self.id): self.id,
-            "m_gallog_lately": "{}%7C%uB204%uB974%uC9C0%uB9C8%2C;".format(self.id),
-            "_gat_mobile_gallog_{}".format(mode): "1",
-        }
-        async with self.sess.post(url, headers=header, data=payload, cookies=cookies) as res:
-            text = await res.read()
-            if b"\\uc7a0\\uc2dc\\ud6c4" in text: 
-                #await self.sess.close()
-                #self.gen_session()
-                #if self.id is not None:
-                #    await self.login(self.id, self.pw)
-                print("timeout occured..raise timeout error")
-                raise asyncio.TimeoutError
-            return (naive_parse(await res.read(), b'result":', b'}') == b'true')
     async def remove_gallog_posts(self):
         if self.id is None: return None
-        mode = "G"
         corus = [self.__remove_gallog_entry(mode, docid) for docid in await self.__gallog_entries(mode)]
-        if not len(corus):
-            return None
-        L = 50
-        for i in range(len(corus)//L+1):
-            await asyncio.gather(*corus[L*i:L*(i+1)])
-            await self.sess.close()
-            self.gen_session()
-            if self.id is not None:
-                await self.login(self.id, self.pw)
-        #res = await limited_api(10, 1.0, corus)
+        res = await limited_api(10, 1.0, corus)
         #res = await asyncio.gather(*[self.__remove_gallog_entry(mode, docid) for docid in await self.__gallog_entries(mode)])
-        return None
+        return res
     async def remove_gallog_replies(self):
         if self.id is None: return None
         mode = "R"
         corus = [self.__remove_gallog_entry(mode, docid) for docid in await self.__gallog_entries(mode)]
-        if not len(corus):
-            return None
-        L = 50
-        for i in range(len(corus)//L+1):
-            await asyncio.gather(*corus[L*i:L*(i+1)])
-            await self.sess.close()
-            self.gen_session()
-            if self.id is not None:
-                await self.login(self.id, self.pw)
-        #res = await limited_api(1, 0.1, corus)
+        res = await limited_api(1, 0.1, corus)
         #res = await asyncio.gather(*[self.__remove_gallog_entry(mode, docid) for docid in await self.__gallog_entries(mode)])
-        return None
+        return res
+    async def __gallog_replice_page(self, page):
+        url = "http://gallog.dcinside.com/{}/comment?p={}".format(self.id, page)
+        self.sess.get(url, headers=ALTERNATIVE_GET_HEADERS) as res:
+            text = await res.read()
+            no = naive_parse_all(text, b'&no=', b'"')[::2]
+    async def __gallog_replies(self):
+        page = 1
+        url = "http://gallog.dcinside.com/{}/comment?p={}".format(self.id, page)
+        self.sess.get(url, headers=ALTERNATIVE_GET_HEADERS) as res:
+            text = await res.read()
+            last_page = int(naive_parse(text, b'page_end href="', b'"').split(b"=")[1].decode())
+            asyncio.gather(*[self.__gallog_replies_page(page) for page in range(page, last_page+1)])
+                
     async def remove_test(self,docid): 
         return await self.__remove_gallog_entry("G", docid)
 
 async def main():
     async with Dc() as dc:
         await dc.login("bot123", "1q2w3e4r!")
-        print(await dc.remove_gallog_posts())
         print(await dc.remove_gallog_replies())
         #print(await dc.remove_gallog_posts())
         #print(await dc.remove_test(10000))

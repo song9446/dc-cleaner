@@ -6,8 +6,8 @@ slaves=$(sed -nr "/^\[Slave\]/ { :l /^hosts[ ]*=/ { s/.*=[ ]*//; p; q;}; n; b l;
 cd master/front && ./run.sh
 cd .. && cd ..
 
-ssh $beanstalkd -t beanstalkd &
+nohup ~/beanstalkd/beanstalkd &
 sleep 3
 
-cd slave && python3 ./run.py &
-cd master && python3 ./run.py &
+cd slave && nohup python3 ./run.py > slave.log 2>&1 &
+cd master && nohup python3 ./run.py > master.log 2>&1 &

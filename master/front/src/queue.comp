@@ -5,6 +5,13 @@
     flex-wrap: wrap;
     justify-content: center;
 }
+img[src="important-black.svg"]{
+    vertical-align: middle;
+    width: 1.5em;
+    height: 1.5em;
+    margin-right: 0.5em;
+    margin-left: -1.2em;
+}
 img[src="delete-black.svg"]{
     vertical-align: middle;
     width: 1.5em;
@@ -44,6 +51,9 @@ input[type="checkbox"] {
 .running {
     text-decoration: underline;
 }
+button[disabled] {
+    background-color: #aaa;
+}
 </style>
 <div class="fluid">
     <div class="pannel" id="hard">
@@ -66,7 +76,7 @@ input[type="checkbox"] {
         <button id="hard-submit"><img src="delete-white.svg" ></button>
     </div>
     <div class="pannel" id="fluid">
-        <div><img src="delete-black.svg" >갤러리 유동 글 삭제(최근글만)</div><br>
+        <div><img src="delete-black.svg" >갤러리 유동 글 삭제(공사중..)</div><br>
         <label for="fluid-gall-id">갤러리아이디</label>
         <input id="fluid-gall-id" name="fluid-gall-id" placeholder="baseball_new7"><br>
         <label for="fluid-nickname">닉네임</label>
@@ -75,7 +85,7 @@ input[type="checkbox"] {
         <input type="password" id="fluid-pw" name="fluid-pw"><br>
         <label for="fluid-ip">아이피 앞 두자리</label>
         <input id="fluid-ip" name="fluid-ip" placeholder="110.20">
-        <button id="fluid-submit"><img src="delete-white.svg" ></button>
+        <button id="fluid-submit" disabled><img src="delete-white.svg" >공사중..</button>
     </div>
     <div class="pannel">
         <div><img src="list-black.svg" >대기목록</div><br>
@@ -91,6 +101,12 @@ input[type="checkbox"] {
         </tbody>
     </table>
     <button id="refresh_q"><img src="refresh-white.svg"></button>
+    </div>
+    <div class="pannel">
+        <div><img src="important-black.svg">안내</div><br>
+        <span> 현제 디씨측에서 요청에 제한을 걸어놔 원할히 작동하지 않습니다.(설연휴에 손볼 예정입니다)</span>
+        <span> 비밀번호를 5회이상 틀리시는 경우 해당 아이디에 자동입력방지코드가 생성되어 기능이 작동하지 않습니다.</span>
+        <span> 자동입력방지코드가 생성된 경우 직접 브라우저에서 풀어주셔야 기능이 작동됩니다. </span>
     </div>
 </div>
 <import path="modal-loading-spinner.comp" key="modal-loading-queue"></import>
