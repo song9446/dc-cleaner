@@ -52,6 +52,8 @@ async def put_queue(req):
         parsed = req.json
         if "id" not in parsed or "op" not in parsed:
             return response.text(str("no op or id field in request"))
+        if parsed["id"] in user_q:
+            return response.text("이미 대기열에 등록된 유저입니다")
         user_q.append(parsed["id"])
         req_q.put(parsed)
         return response.json([i for i in user_q])

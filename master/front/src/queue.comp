@@ -149,7 +149,11 @@ hard_submit.onclick = ()=>{
     };
     app.queue(payload).then(q=>{
         console.log(q);
-        q = JSON.parse(q);
+        try{
+            q = JSON.parse(q);
+        } catch(err) {
+            throw q;
+        }
         waitq.innerHTML = "";
         q.forEach(id => waitq.insertRow().insertCell().textContent = ""+id);
         if(waitq.rows.length){

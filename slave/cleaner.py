@@ -253,6 +253,7 @@ class Dc:
         async with self.sess.get(url) as res:
             text = await res.read()
             csrf = self.__fetch_csrf(text)
+            print(text)
             docs_num = int(naive_parse(text, b'<span class="count2">(', b')').replace(b',',b''))
             page_num_upper_bound = docs_num//30+1
         docs = await asyncio.gather(*(self.__gallog_page_entries(mode, i, csrf) for i in range(1, page_num_upper_bound+1)))
@@ -326,7 +327,7 @@ class Dc:
 
 async def main():
     async with Dc() as dc:
-        await dc.login("bot123", "1q2w3e4r!")
+        await dc.login("s3014", "")
         print(await dc.remove_gallog_posts())
         print(await dc.remove_gallog_replies())
         #print(await dc.remove_gallog_posts())
